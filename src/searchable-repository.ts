@@ -1,9 +1,9 @@
 import { makeObservable, override, transaction } from "mobx";
-import { bind } from "bind-decorator";
 
 import { IndexableRepository } from "./indexable-repository";
 import { PromiseCallbacks } from "./listeners";
 import { RequestStatus, RequestStates } from "./request-states";
+import { BoundMethod } from "@aloreljs/bound-decorator";
 
 /**
  * The request state associated with a request from [[SearchableRepository]].
@@ -46,7 +46,7 @@ export interface Searchable<TQuery, TEntity> {
      *     @observer
      *     class MyComponent extends React.Component<{ id: string }> {
      *         // The current query as entered by the user.
-     *         @observable private search = 0;
+     *         @observable private accessor search = 0;
      *
      *         // Get access to the repository.
      *         // For example using dependency-injection, context or props.
@@ -192,7 +192,8 @@ export interface Searchable<TQuery, TEntity> {
  */
 export abstract class SearchableRepository<TQuery, TEntity, TId = string, TBatchId = string>
     extends IndexableRepository<TEntity, TId, TBatchId>
-    implements Searchable<TQuery, TEntity> {
+    implements Searchable<TQuery, TEntity>
+{
     constructor() {
         super();
         makeObservable(this);
@@ -259,7 +260,7 @@ export abstract class SearchableRepository<TQuery, TEntity, TId = string, TBatch
     }
 
     /** @inheritdoc */
-    @override public evict(id: TId): void {
+    public evict(id: TId): void {
         super.evict(id);
         this.stateByQuery.forEach((info) => {
             if (info.state.resultingIds.has(id)) {
@@ -277,7 +278,7 @@ export abstract class SearchableRepository<TQuery, TEntity, TId = string, TBatch
     }
 
     /** @inheritdoc */
-    @override public reset(): void {
+    public reset(): void {
         super.reset();
         this.listenersByQuery.forEach((listener) => {
             listener.forEach(({ reject }) => reject(new Error("Repository was reset while waiting.")));
@@ -315,7 +316,7 @@ export abstract class SearchableRepository<TQuery, TEntity, TId = string, TBatch
         this.listenersByQuery.delete(key);
     }
 
-    @bind private async loadByQuery(query: TQuery): Promise<void> {
+    @BoundMethod() private async loadByQuery(query: TQuery): Promise<void> {
         if (this.stateByQuery.isStatus(query, RequestStatus.DONE)) {
             return;
         }
@@ -327,15 +328,15 @@ export abstract class SearchableRepository<TQuery, TEntity, TId = string, TBatch
         try {
             const { entities } = await this.fetchByQuery(query);
             transaction(() => {
-                entities.forEach(entity => this.add(entity));
-                const resultingIds = new Set(entities.map(entity => this.extractId(entity)));
+                entities.forEach((entity) => this.add(entity));
+                const resultingIds = new Set(entities.map((entity) => this.extractId(entity)));
                 this.stateByQuery.setState(query, { resultingIds });
                 this.stateByQuery.setStatus(query, RequestStatus.DONE);
                 this.callListenersByQuery(query);
             });
         } catch (error) {
             this.stateByQuery.setStatus(query, RequestStatus.ERROR, error);
-            this.errorListeners.forEach(callback => callback(error));
+            this.errorListeners.forEach((callback) => callback(error));
             this.callListenersByQuery(query, error);
         }
     }

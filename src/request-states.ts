@@ -70,7 +70,7 @@ export type RequestInfo<TId, TState, TError> =
  * Information (such as status, error and state) about a set of requests.
  */
 export class RequestStates<TId = string, TState = undefined, TError = Error> {
-    @observable public requestStates = new Map<string, RequestInfo<TId, TState, TError>>();
+    @observable public accessor requestStates = new Map<string, RequestInfo<TId, TState, TError>>();
 
     constructor(private stateFactory: () => TState = () => undefined) {
         makeObservable(this);
@@ -82,7 +82,7 @@ export class RequestStates<TId = string, TState = undefined, TError = Error> {
      * @param callback A method called once for every known [[RequestInfo]].
      */
     public forEach(callback: (info: RequestInfo<TId, TState, TError>) => void): void {
-        this.requestStates.forEach(info => callback(info));
+        this.requestStates.forEach((info) => callback(info));
     }
 
     /**
@@ -98,14 +98,14 @@ export class RequestStates<TId = string, TState = undefined, TError = Error> {
     /**
      * Update the status for the specified request.
      * Can always be safely invoked, even if the request was not known before.
-     * 
+     *
      * @param id The id of the request to update.
      * @param status The new status.
      */
     public setStatus(id: TId, status: RequestStatus): void;
     /**
      * Update the status for the specified request to be an error.
-     * 
+     *
      * @param id The id of the request to update.
      * @param error The error that occurred.
      * @param status The new status.
@@ -123,7 +123,7 @@ export class RequestStates<TId = string, TState = undefined, TError = Error> {
     /**
      * Update the state for the specified request.
      * Can always be safely invoked, even if the request was not known before.
-     * 
+     *
      * @param id The id of the request to update.
      * @param state The new state.
      */
@@ -137,9 +137,9 @@ export class RequestStates<TId = string, TState = undefined, TError = Error> {
      * Can always be safely invoked, even if the request was not known before.
      * A new state will be initialized then.
      * The returned state can safely be mutated.
-     * 
+     *
      * @param id The id of the request to get the state of.
-     * 
+     *
      * @return The state.
      */
     public getState(id: TId): TState {
@@ -148,10 +148,10 @@ export class RequestStates<TId = string, TState = undefined, TError = Error> {
 
     /**
      * Check if the specified request is in any of the provided status.
-     * 
+     *
      * @param id The id of the request to check.
      * @param status A list of status. The request must be in any of those status.
-     * 
+     *
      * @return `true` if the request's status was included in the list of specified status and `false` otherwise.
      */
     public isStatus(id: TId, ...status: RequestStatus[]): boolean {
@@ -168,7 +168,7 @@ export class RequestStates<TId = string, TState = undefined, TError = Error> {
     /**
      * Delete all information about the specified request.
      * The request can afterwards still be retrieved, but will then be reinitialized.
-     * 
+     *
      * @param id The id of the request to delete.
      */
     @action.bound public delete(id: TId): void {
@@ -177,9 +177,9 @@ export class RequestStates<TId = string, TState = undefined, TError = Error> {
 
     /**
      * Get all information about the specified request.
-     * 
+     *
      * @param id Id of the request.
-     * 
+     *
      * @return All information about the specified request.
      */
     public get(id: TId): RequestInfo<TId, TState, TError> {

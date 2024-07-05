@@ -8,15 +8,15 @@ import { Pagination } from "./pagination";
  * A set of all currently loaded pagination segments for a specific query.
  */
 export class PaginationRange<TId> {
-    constructor(){
+    constructor() {
         makeObservable(this);
     }
 
-    @observable public segments: SegmentWithIds<TId>[] = [];
+    @observable public accessor segments: SegmentWithIds<TId>[] = [];
 
     /**
      * Designate a new segment to be loaded.
-     * 
+     *
      * @param segment The segment that was loaded, with its offset and all included ids.
      */
     @action.bound public add(segment: SegmentWithIds<TId>): void {
@@ -35,7 +35,7 @@ export class PaginationRange<TId> {
      * This range can contain multiple segments that are loaded and will ignore "gaps".
      *
      * @param pagination The range to lookup the ids of.
-     * 
+     *
      * @return A set with all ids withing the provided range.
      */
     getIds(pagination: Pagination): Set<TId> {
@@ -54,9 +54,9 @@ export class PaginationRange<TId> {
 
     /**
      * Calculate all missing sub-segments within a given pagination.
-     * 
+     *
      * @param requested The range to calculate the missing segments of.
-     * 
+     *
      * @return A list of missing segments in the specified range. If the range is fully loaded,
      *     an empty array will be returned.
      */
@@ -74,9 +74,9 @@ export class PaginationRange<TId> {
 
     /**
      * Check whether a provided range is fully loaded.
-     * 
+     *
      * @param requested The range to check.
-     * 
+     *
      * @return `true` if the range is loaded and `false` if at least one id is missing.
      */
     public isFullyLoaded(requested: Pagination): boolean {
@@ -85,12 +85,12 @@ export class PaginationRange<TId> {
 
     /**
      * Check if any known segment contains the specified id.
-     * 
+     *
      * @param id The id to look up.
-     * 
+     *
      * @return `true` if any segment within this range has this id and `false` otherwise.
      */
     public hasId(id: TId): boolean {
-        return this.segments.some(segment => segment.hasId(id));
+        return this.segments.some((segment) => segment.hasId(id));
     }
 }

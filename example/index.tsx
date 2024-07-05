@@ -20,12 +20,12 @@ export interface IGithubRepository {
 }
 
 export class GithubRepository implements IGithubRepository {
-    @observable public description: string;
-    @observable public forks: number;
-    @observable public stars: number;
-    @observable public name: string;
-    @observable public id: number;
-    @observable public owner: { login: string };
+    @observable public accessor description: string;
+    @observable public accessor forks: number;
+    @observable public accessor stars: number;
+    @observable public accessor name: string;
+    @observable public accessor id: number;
+    @observable public accessor owner: { login: string };
 
     constructor(options: IGithubRepository) {
         this.description = options.description;
@@ -57,7 +57,7 @@ export class StoreGithubRepositories extends PaginatedSearchableRepository<IGith
             throw response;
         }
         const { items } = await response.json();
-        const entities = items.map(item => new GithubRepository(item));
+        const entities = items.map((item) => new GithubRepository(item));
         return { entities };
     }
 
@@ -83,13 +83,13 @@ export class GithubRepositoryList extends React.Component {
     private store = new StoreGithubRepositories();
     private count = 10;
 
-    @observable private offset = 0;
-    @observable private name = "mobx";
+    @observable private accessor offset = 0;
+    @observable private accessor name = "mobx";
 
     constructor(props: unknown) {
         super(props);
         makeObservable(this);
-        this.store.addErrorListener(err => alert("An error occured!"));
+        this.store.addErrorListener((err) => alert("An error occured!"));
     }
 
     public render(): JSX.Element {
@@ -97,11 +97,14 @@ export class GithubRepositoryList extends React.Component {
         const items = this.store.byQuery({ name }, { offset, count });
         return (
             <div>
-                <input value={name} onChange={action(evt => (this.name = evt.currentTarget.value))} />
+                <input value={name} onChange={action((evt) => (this.name = evt.currentTarget.value))} />
                 <ul>
-                    {items.map(repo => (
+                    {items.map((repo) => (
                         <li key={repo.id}>
-                            <input value={repo.name} onChange={action(evt => (repo.name = evt.currentTarget.value))} />
+                            <input
+                                value={repo.name}
+                                onChange={action((evt) => (repo.name = evt.currentTarget.value))}
+                            />
                         </li>
                     ))}
                 </ul>

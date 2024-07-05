@@ -50,10 +50,10 @@ export interface PaginatedSearchable<TQuery, TEntity> extends Searchable<TQuery,
      *     @observer
      *     class MyComponent extends React.Component<{ id: string }> {
      *         // The currently active page.
-     *         @observable private page = 0;
+     *         @observable private accessor page = 0;
      *
      *         // The current query as entered by the user.
-     *         @observable private search = 0;
+     *         @observable private accessor search = 0;
      *
      *         // The size of each page.
      *         private count = 10;
@@ -251,7 +251,8 @@ interface ListenerSpecification<TQuery> {
  */
 export abstract class PaginatedSearchableRepository<TQuery, TEntity, TId = string, TBatchId = string>
     extends IndexableRepository<TEntity, TId, TBatchId>
-    implements PaginatedSearchable<TQuery, TEntity> {
+    implements PaginatedSearchable<TQuery, TEntity>
+{
     constructor(cloneEntity?: (entity: TEntity) => TEntity) {
         super(cloneEntity);
         makeObservable(this);
@@ -337,7 +338,7 @@ export abstract class PaginatedSearchableRepository<TQuery, TEntity, TId = strin
     }
 
     /** @inheritdoc */
-    @override public evict(id: TId): void {
+    public evict(id: TId): void {
         super.evict(id);
         this.stateByQuery.forEach((info) => {
             if (info.state.paginationRange.hasId(id)) {
@@ -356,7 +357,7 @@ export abstract class PaginatedSearchableRepository<TQuery, TEntity, TId = strin
     }
 
     /** @inheritdoc */
-    @override public reset(): void {
+    public reset(): void {
         super.reset();
         this.listenersByQuery.forEach(({ listener }) =>
             listener.reject(new Error("Repository was reset while waiting.")),

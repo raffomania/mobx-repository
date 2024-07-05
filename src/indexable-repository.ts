@@ -1,10 +1,10 @@
 import { observable, action, makeObservable } from "mobx";
-import { bind } from "bind-decorator";
 import clone from "clone";
 
 import { RequestStatus, RequestStates } from "./request-states";
 import { PromiseCallbacks, ErrorListener } from "./listeners";
 import { Repository } from "./repository";
+import { BoundMethod } from "@aloreljs/bound-decorator";
 
 export interface LoadOptions {
     force?: boolean;
@@ -326,14 +326,15 @@ export interface Indexable<TEntity, TId = string, TBatchId = string> {
  * ```
  */
 export abstract class IndexableRepository<TEntity, TId = string, TBatchId = string>
-    implements Indexable<TEntity, TId, TBatchId>, Repository {
+    implements Indexable<TEntity, TId, TBatchId>, Repository
+{
     private cloneEntity: (entity: TEntity) => TEntity;
 
     /**
      * A map including all entities in the cache.
      * Indexed by the ids extracted in [[IndexableRepository.extractId]].
      */
-    @observable public entities = new Map<TId, TEntity>();
+    @observable public accessor entities = new Map<TId, TEntity>();
 
     /**
      * A map holding batches of mutable copies of entities.
@@ -343,7 +344,7 @@ export abstract class IndexableRepository<TEntity, TId = string, TBatchId = stri
      * It grants precisely control over which mutable copy you want to work with.
      * A batch is indexed by the ids extracted in [[IndexableRepository.extractId]].
      */
-    @observable public mutableCopyBatches = new Map<TBatchId, Map<TId, TEntity>>();
+    @observable public accessor mutableCopyBatches = new Map<TBatchId, Map<TId, TEntity>>();
 
     constructor(cloneEntity: (entity: TEntity) => TEntity = clone) {
         this.cloneEntity = cloneEntity;
@@ -557,7 +558,7 @@ export abstract class IndexableRepository<TEntity, TId = string, TBatchId = stri
         this.listenersById.delete(id);
     }
 
-    @bind private async loadById(id: TId, { force = false }: LoadOptions = {}): Promise<void> {
+    @BoundMethod() private async loadById(id: TId, { force = false }: LoadOptions = {}): Promise<void> {
         if (!force && (this.isLoaded(id) || this.stateById.isStatus(id, RequestStatus.DONE))) {
             return;
         }
